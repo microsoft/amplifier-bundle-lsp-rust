@@ -36,6 +36,10 @@ tools:
             codeAction: true
             inlayHints: true
             customRequest: true
+            # Not supported by rust-analyzer
+            prepareTypeHierarchy: false
+            supertypes: false
+            subtypes: false
           initialization_options:
             checkOnSave:
               command: clippy
