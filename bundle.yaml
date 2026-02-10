@@ -1,0 +1,12 @@
+# Rust LSP Bundle
+# Provides Rust language support for code intelligence via rust-analyzer.
+# The rust-lsp behavior includes lsp-core which provides the tool-lsp module.
+
+bundle:
+  name: lsp-rust
+  version: 0.1.0
+  description: Rust LSP support via rust-analyzer
+
+# Include only the rust-lsp behavior - it already includes lsp-core internally
+includes:
+  - bundle: lsp-rust:behaviors/rust-lsp.yaml
