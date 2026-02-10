@@ -54,7 +54,8 @@ def test_rust_capabilities_declared():
     caps = next(t["config"] for t in behavior["tools"] if t["module"] == "tool-lsp")[
         "languages"
     ]["rust"]["capabilities"]
-    assert caps.get("typeHierarchy") is True
+    # typeHierarchy removed: rust-analyzer does not support prepareTypeHierarchy
+    assert "typeHierarchy" not in caps
     assert caps.get("diagnostics") is True
     assert caps.get("rename") is True
     assert caps.get("codeAction") is True

@@ -32,11 +32,10 @@ Other agents with tool-lsp can handle simple single-operation lookups directly. 
 ## Rust-Specific Strategies
 
 ### Understanding a Trait
-1. `hover` on trait name for documentation and bounds
-2. `goToImplementation` on trait to find all implementors
-3. `subtypes` to explore the trait hierarchy downward
-4. `supertypes` to find supertraits
-5. `findReferences` to see all usage sites
+1. `hover` on trait name for full signature and docs
+2. `goToDefinition` to find the trait definition
+3. `goToImplementation` to find all implementors
+4. `findReferences` for broader usage patterns
 
 ### Understanding a Struct
 1. `hover` on struct name for type info and documentation
@@ -66,15 +65,14 @@ Other agents with tool-lsp can handle simple single-operation lookups directly. 
 
 ### Navigating Generics and Trait Bounds
 1. `hover` for resolved concrete types at call sites
-2. `supertypes` on a trait to see its trait bounds chain
+2. `goToDefinition` on trait bounds to understand constraints
 3. `inlayHints` for bulk type information across a function
-4. `goToDefinition` on trait bounds to understand constraints
+4. `findReferences` on trait names to trace where bounds are applied
 
 ### Finding Trait Implementations
 1. `goToImplementation` on a trait name to find all implementors
-2. `subtypes` on a type to see its position in the type hierarchy
-3. `hover` on each implementor for documentation
-4. `findReferences` on trait methods for usage patterns
+2. `hover` on each implementor for documentation
+3. `findReferences` on trait methods for usage patterns
 
 ### Verifying Code Changes
 1. `diagnostics` after edits to catch compiler errors and warnings
@@ -108,7 +106,6 @@ Use `customRequest` with method `rust-analyzer/viewRecursiveMemoryLayout` to und
 ## Known Capabilities (rust-analyzer)
 
 - **goToImplementation**: Fully supported - finds all trait implementors and inherent impls
-- **Type hierarchy**: Full supertypes/subtypes support for traits and types
 - **Code actions**: ~100+ code actions including extract function, inline, add missing impls, fill match arms
 - **Inlay hints**: Rich hints for types, lifetimes, chaining, parameter names, closure return types
 - **Diagnostics**: Integrated clippy lints and compiler diagnostics
@@ -140,6 +137,28 @@ Build scripts (`build.rs`) generate code that rust-analyzer needs:
 1. Requires `target/` directory to exist
 2. Run `cargo check` to generate build script output
 3. Without this, generated code may not resolve
+
+### Type Hierarchy Not Supported
+rust-analyzer does not implement `prepareTypeHierarchy`/`supertypes`/`subtypes` (returns "unknown request"):
+1. Use `goToImplementation` on traits to find all implementors
+2. Use `findReferences` for broader type relationship discovery
+3. These two operations cover the most common type hierarchy use cases
+
+### Async Call Hierarchy
+`incomingCalls`/`outgoingCalls` may return empty for async functions, especially when called through generic trait bounds. This is a rust-analyzer limitation:
+1. Use `findReferences` as fallback for tracing async function callers
+2. Trait method dispatch through generics is not tracked in the call hierarchy
+
+### Cold-Start
+First operations after server start may fail or return empty while rust-analyzer indexes the workspace:
+1. Retry once if you get empty results or "file not found" errors
+2. Run `diagnostics` on a file to trigger analysis and confirm the server is ready
+3. Large workspaces may need additional time beyond the built-in startup delay
+
+### Code Actions Require Indexed Workspace
+`codeAction` may return empty if the workspace hasn't finished indexing:
+1. Try `diagnostics` first to trigger analysis
+2. Then retry `codeAction` after diagnostics return results
 
 ## Output Style
 

@@ -31,7 +31,6 @@ tools:
               - --version
             install_hint: "Install with: rustup component add rust-analyzer"
           capabilities:
-            typeHierarchy: true
             diagnostics: true
             rename: true
             codeAction: true
