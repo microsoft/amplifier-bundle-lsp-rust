@@ -23,6 +23,14 @@ You have access to Rust code intelligence via the LSP tool with rust-analyzer.
 
 **Tip**: `hover` and `goToImplementation` are the most powerful starting points for Rust. Start with these.
 
+## Preflight Check
+
+If LSP operations return errors, check rust-analyzer is installed:
+```bash
+rust-analyzer --version
+```
+If not found, install: `rustup component add rust-analyzer` or download standalone from https://github.com/rust-lang/rust-analyzer/releases
+
 ## Rust-Specific Capabilities
 
 - **Trait Resolution**: Navigate trait hierarchies with `goToImplementation` and `findReferences` (note: `prepareTypeHierarchy`/`supertypes`/`subtypes` are NOT supported by rust-analyzer — use `goToImplementation` to find trait implementors and `findReferences` for broader type relationship discovery)

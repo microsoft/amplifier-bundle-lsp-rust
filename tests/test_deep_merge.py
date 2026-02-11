@@ -92,3 +92,65 @@ def test_all_yaml_valid():
     for yaml_file in root.rglob("*.yaml"):
         content = yaml.safe_load(yaml_file.read_text())
         assert content is not None, f"{yaml_file} is empty or invalid"
+
+
+def test_agent_has_prerequisite_validation():
+    """Agent includes prerequisite validation section before strategies."""
+    content = (
+        Path(__file__).parent.parent / "agents" / "rust-code-intel.md"
+    ).read_text()
+
+    # Section must exist
+    assert "## Prerequisite Validation" in content, (
+        "Agent must have a '## Prerequisite Validation' section"
+    )
+
+    # Must appear before the strategy sections
+    prereq_pos = content.index("## Prerequisite Validation")
+    strategies_pos = content.index("## Rust-Specific Strategies")
+    assert prereq_pos < strategies_pos, (
+        "Prerequisite Validation must appear before Rust-Specific Strategies"
+    )
+
+    # Must mention key validation steps
+    assert (
+        "rust-analyzer --version" in content
+        or "rust-analyzer is not installed" in content
+    ), "Must provide installation guidance"
+    assert "expandMacro" in content, "Must mention custom extension checking"
+
+
+def test_agent_description_mentions_validation():
+    """Agent frontmatter description mentions prerequisite validation."""
+    content = (
+        Path(__file__).parent.parent / "agents" / "rust-code-intel.md"
+    ).read_text()
+    parts = content.split("---", 2)
+    meta = yaml.safe_load(parts[1])
+    description = meta["meta"]["description"]
+    assert (
+        "rust-analyzer" in description.lower() or "validates" in description.lower()
+    ), "Description should mention rust-analyzer validation"
+    assert "installation" in description.lower() or "install" in description.lower(), (
+        "Description should mention installation guidance"
+    )
+
+
+def test_context_has_preflight_check():
+    """Rust LSP context includes preflight check section."""
+    content = (Path(__file__).parent.parent / "context" / "rust-lsp.md").read_text()
+
+    assert "## Preflight Check" in content, (
+        "Context must have a '## Preflight Check' section"
+    )
+
+    # Must appear early — after quick start table but before detailed sections
+    preflight_pos = content.index("## Preflight Check")
+    capabilities_pos = content.index("## Rust-Specific Capabilities")
+    assert preflight_pos < capabilities_pos, (
+        "Preflight Check must appear before Rust-Specific Capabilities"
+    )
+
+    assert "rust-analyzer --version" in content, (
+        "Preflight section must include version check command"
+    )
