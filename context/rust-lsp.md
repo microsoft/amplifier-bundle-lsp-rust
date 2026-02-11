@@ -80,11 +80,18 @@ Ensure your project has a `Cargo.toml` at the root for accurate analysis. For Ca
 
 ## Installation
 
-rust-analyzer is installed via rustup:
+rust-analyzer can be installed two ways:
 
+**Standalone (recommended for full features):**
+Download from https://github.com/rust-lang/rust-analyzer/releases
+- Includes all custom extensions (expandMacro, relatedTests, runnables, etc.)
+
+**Via rustup (simpler but may lack extensions):**
 ```bash
 rustup component add rust-analyzer
 ```
+- The rustup version may lag behind standalone releases
+- Custom extensions (expandMacro, relatedTests) may not be available
 
 Verify installation:
 ```bash
@@ -93,8 +100,8 @@ rust-analyzer --version
 
 ## Known Limitations
 
-### workspaceSymbol May Return Empty Initially
-Large Cargo workspaces need time for rust-analyzer to index:
+### workspaceSymbol May Return Empty
+Returns empty results due to rust-analyzer indexing lifecycle. Use `documentSymbol` per-file or grep for workspace-wide symbol search.
 - **Workaround**: Run `documentSymbol` on relevant files first, wait 2-3 seconds, then retry `workspaceSymbol`.
 
 ### Proc Macro Expansion Requires Build
@@ -124,6 +131,10 @@ First operations on a fresh server may fail or return empty results while rust-a
 ### Code Actions Require Indexed Workspace
 `codeAction` may return empty if the workspace hasn't finished indexing.
 - **Workaround**: Try `diagnostics` first to trigger analysis, then `codeAction`.
+
+### Custom Extensions (expandMacro, relatedTests)
+May not be available in the rustup component version. Install standalone rust-analyzer from GitHub releases for full extension support.
+- **Workaround**: If `expandMacro` or `relatedTests` returns "Method not supported", install the standalone build from https://github.com/rust-lang/rust-analyzer/releases.
 
 ## Troubleshooting
 

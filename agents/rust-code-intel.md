@@ -82,11 +82,15 @@ Other agents with tool-lsp can handle simple single-operation lookups directly. 
 
 ## rust-analyzer Extension Strategies (via customRequest)
 
+**Note:** These extensions may not be available in all rust-analyzer builds. The rustup component version may lack custom extensions. Install the standalone build from https://github.com/rust-lang/rust-analyzer/releases for full support.
+
 ### Expanding Macros
 Use `customRequest` with method `rust-analyzer/expandMacro` to see what a macro expands to. Essential for debugging derive macros, `macro_rules!`, and proc macros.
+- **Fallback**: If `expandMacro` returns "Method not supported", read the source code directly to understand macro expansion. For `macro_rules!`, the definition shows the expansion pattern. For derive macros, check the proc macro crate's source.
 
 ### Finding Related Tests
 Use `customRequest` with method `rust-analyzer/relatedTests` to find tests related to a function or struct. Useful for understanding test coverage.
+- **Fallback**: If `relatedTests` returns "Method not supported", use `findReferences` on the function/struct and filter for references in `#[test]` functions, or use grep to search for the symbol name in test modules.
 
 ### Getting External Documentation
 Use `customRequest` with method `experimental/externalDocs` to get links to docs.rs or standard library documentation for a symbol.

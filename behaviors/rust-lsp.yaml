@@ -29,7 +29,7 @@ tools:
             install_check:
               - rust-analyzer
               - --version
-            install_hint: "Install with: rustup component add rust-analyzer"
+            install_hint: "Install standalone from https://github.com/rust-lang/rust-analyzer/releases or via rustup: rustup component add rust-analyzer"
           capabilities:
             diagnostics: true
             rename: true
