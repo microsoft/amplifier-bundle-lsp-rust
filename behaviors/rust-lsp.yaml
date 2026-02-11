@@ -30,6 +30,8 @@ tools:
               - rust-analyzer
               - --version
             install_hint: "Install standalone from https://github.com/rust-lang/rust-analyzer/releases or via rustup: rustup component add rust-analyzer"
+            lifecycle: timeout
+            idle_timeout: 300
           capabilities:
             diagnostics: true
             rename: true

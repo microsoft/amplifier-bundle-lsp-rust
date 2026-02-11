@@ -39,6 +39,11 @@ Run a simple `hover` operation on the project's `src/main.rs` or `src/lib.rs` (l
 - The LSP server started successfully
 - The workspace is being indexed
 
+**Note:** rust-analyzer runs as a persistent service. If a previous session
+already warmed up the server, this check should succeed immediately. If this
+is the first session on a cold workspace, the server may need 30-90 seconds
+to index before operations return rich results.
+
 ### Step 2: Interpret the result
 - **Success (type info returned)**: Server is healthy. Proceed with investigation.
 - **"No information available"**: Server is still indexing. Wait a moment, try `diagnostics` on the same file to warm up, then retry hover.
@@ -185,11 +190,11 @@ rust-analyzer does not implement `prepareTypeHierarchy`/`supertypes`/`subtypes` 
 1. Use `findReferences` as fallback for tracing async function callers
 2. Trait method dispatch through generics is not tracked in the call hierarchy
 
-### Cold-Start
-First operations after server start may fail or return empty while rust-analyzer indexes the workspace:
-1. Retry once if you get empty results or "file not found" errors
-2. Run `diagnostics` on a file to trigger analysis and confirm the server is ready
-3. Large workspaces may need additional time beyond the built-in startup delay
+### Cold-Start (first session only)
+- The persistent server eliminates cold-start for subsequent sessions
+- First session on a new workspace still needs indexing time
+- If the server was idle for >5 minutes, it auto-shut down and will need to restart
+- Retry if you get empty results — the server may be re-indexing
 
 ### Code Actions Require Indexed Workspace
 `codeAction` may return empty if the workspace hasn't finished indexing:

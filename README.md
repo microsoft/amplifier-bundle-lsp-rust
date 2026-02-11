@@ -138,6 +138,39 @@ tools:
               allFeatures: false  # Only default features
 ```
 
+## Persistent Server
+
+rust-analyzer runs as a persistent background service, eliminating cold-start
+indexing delay for subsequent sessions. The server stays alive for 5 minutes
+after the last session disconnects, then auto-shuts down.
+
+### Configuration
+
+```yaml
+server:
+  lifecycle: timeout    # session | persistent | timeout
+  idle_timeout: 300     # seconds before auto-shutdown (default: 300)
+```
+
+| Mode | Behavior |
+|------|----------|
+| `session` | Server killed when session ends (no persistence) |
+| `timeout` | Server stays alive, auto-kills after idle_timeout (default) |
+| `persistent` | Server stays alive indefinitely (manual cleanup) |
+
+### Managing Servers
+
+```bash
+# Check running servers
+ls ~/.amplifier/lsp-servers/
+
+# View server details
+cat ~/.amplifier/lsp-servers/rust-*.json
+
+# Force restart (delete state file)
+rm ~/.amplifier/lsp-servers/rust-*.json
+```
+
 ## Available Operations
 
 ### Standard LSP Operations

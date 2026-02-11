@@ -106,6 +106,33 @@ Verify installation:
 rust-analyzer --version
 ```
 
+## Persistent Server
+
+rust-analyzer runs as a persistent background service via a lightweight proxy.
+This eliminates cold-start indexing delay for subsequent sessions on the same project.
+
+**How it works:**
+- First session: rust-analyzer starts and indexes the workspace (may take 30-90 seconds for large projects)
+- Subsequent sessions: connect to the already-warm server instantly
+- Sub-agent delegations (rust-code-intel): also connect to the warm server
+- After 5 minutes with no active sessions, the server shuts down automatically
+
+**Controlling the server:**
+- Servers are scoped per project directory — each workspace gets its own rust-analyzer instance
+- State files at `~/.amplifier/lsp-servers/` track running servers
+- To force a fresh server, delete the state file for your project and start a new session
+- To change the idle timeout, configure `idle_timeout` in your bundle's server config
+
+**Checking server status:**
+```bash
+ls ~/.amplifier/lsp-servers/rust-*.json
+cat ~/.amplifier/lsp-servers/rust-*.json  # Shows PID, port, workspace
+```
+
+**If the server seems stale or unresponsive:**
+1. Delete the state file: `rm ~/.amplifier/lsp-servers/rust-*.json`
+2. Start a new session — a fresh server will be created
+
 ## Known Limitations
 
 ### workspaceSymbol May Return Empty
@@ -132,9 +159,9 @@ rust-analyzer does not implement `prepareTypeHierarchy`/`supertypes`/`subtypes`.
 `incomingCalls`/`outgoingCalls` may return empty results for `async fn`. This is a rust-analyzer limitation — trait method dispatch through generics is not tracked.
 - **Workaround**: Use `findReferences` as fallback for tracing async function usage.
 
-### Cold-Start Indexing
-First operations on a fresh server may fail or return empty results while rust-analyzer indexes the workspace. The tool includes a brief delay after first file open, but large workspaces may need additional time.
-- **Workaround**: Retry if you get empty results on first try. Run `diagnostics` on a file to trigger analysis.
+### Cold-Start Indexing (mitigated by persistent server)
+The persistent server eliminates cold-start for subsequent sessions. First session on a new workspace still needs rust-analyzer to index (30-90 seconds for large projects). If the server was idle for >5 minutes, it auto-shut down and will need to restart.
+- **Workaround**: Check `ls ~/.amplifier/lsp-servers/rust-*.json` to see if a warm server exists. Retry if you get empty results on first try. Run `diagnostics` on a file to trigger analysis.
 
 ### Code Actions Require Indexed Workspace
 `codeAction` may return empty if the workspace hasn't finished indexing.

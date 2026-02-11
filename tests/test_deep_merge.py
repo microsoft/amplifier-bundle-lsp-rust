@@ -136,6 +136,18 @@ def test_agent_description_mentions_validation():
     )
 
 
+def test_rust_lifecycle_config():
+    """Rust server config should have lifecycle and idle_timeout."""
+    behavior = yaml.safe_load(
+        (Path(__file__).parent.parent / "behaviors" / "rust-lsp.yaml").read_text()
+    )
+    server = next(t["config"] for t in behavior["tools"] if t["module"] == "tool-lsp")[
+        "languages"
+    ]["rust"]["server"]
+    assert server.get("lifecycle") == "timeout"
+    assert server.get("idle_timeout") == 300
+
+
 def test_context_has_preflight_check():
     """Rust LSP context includes preflight check section."""
     content = (Path(__file__).parent.parent / "context" / "rust-lsp.md").read_text()
